@@ -2,8 +2,8 @@ name: Daily Report
 
 on:
   schedule:
-    # 每天北京时间早上8点运行 (UTC 0:00)
-    - cron: '0 0 * * *'
+    # 每天北京时间早上7点30运行 (UTC 0:00)
+    - cron: '30 23 * * *'
   workflow_dispatch:  # 允许手动触发
 
 jobs:
