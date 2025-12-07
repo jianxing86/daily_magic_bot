@@ -132,13 +132,16 @@ name: Daily Report
 
 on:
   schedule:
-    # 每天北京时间早上8点运行 (UTC 0:00)
-    - cron: '0 0 * * *'
+    # 每天北京时间早上7:30运行 (UTC 23:30 前一天)
+    - cron: '30 23 * * *'
   workflow_dispatch:  # 允许手动触发
 
 jobs:
   send-report:
     runs-on: ubuntu-latest
+    
+    env:
+      TZ: Asia/Shanghai  # 设置东8区时区，确保日期正确
     
     steps:
       - name: Checkout code
