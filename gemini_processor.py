@@ -242,7 +242,20 @@ class GeminiProcessor:
 2. **天气建议**：分别为北京和济南给出穿衣建议。
 
 3. **新闻筛选**：从列表中选出 10-25 条最重要的科学新闻。
-   - **优先领域（平权）**：白矮星(white dwarf)、脉冲星(pulsar)、恒星物理(stellar physics)、望远镜(telescope)、心理学(psychology)、认知神经科学(cognitive neuroscience)、元认知(metacognition)。
+   **优先领域A - 天体物理学**（以下关键词平权）：
+   - 球状星团(globular cluster)、白矮星(white dwarf)、毫秒脉冲星(millisecond pulsar)
+   - 观测天体物理学(observational astrophysics)、恒星演化(stellar evolution)
+   - 望远镜(telescope)、星震学(asteroseismology)
+   - 中子星(neutron star)、X射线天文学(X-ray astronomy)、引力波(gravitational wave)
+   - 变星(variable star)、恒星物理(stellar physics)、脉冲星(pulsar)
+   
+   **优先领域B - 心理学与神经科学**（以下关键词平权）：
+   - 元认知(metacognition)、fMRI、脑成像(brain imaging)
+   - 认知神经科学(cognitive neuroscience)、工作记忆(working memory)
+   - 注意力(attention)、决策(decision making)、意识(consciousness)
+   - 成瘾(addiction)、奖赏系统(reward system)、多巴胺(dopamine)
+   - 心理学(psychology)、神经科学(neuroscience)
+   
    - 如果其他领域有重大科学发现，也应包含。
    - 数量建议 10-25 条，如果重要新闻较多可扩展到 25 条。
 
