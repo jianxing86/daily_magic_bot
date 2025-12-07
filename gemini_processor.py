@@ -256,9 +256,10 @@ class GeminiProcessor:
    - 成瘾(addiction)、奖赏系统(reward system)、多巴胺(dopamine)
    - 心理学(psychology)、神经科学(neuroscience)
    
-   - 如果其他领域有重大科学发现，也应包含。
-   - 数量建议 10-25 条，如果重要新闻较多可扩展到 25 条。
-
+   **筛选原则**：
+   - 如果其他领域有重大科学发现，也应包含
+   - **日期优先**：同等重要性下，优先选择日期更近的新闻（今天 > 昨天）
+   - 数量建议 10-25 条，如果重要新闻较多可扩展到 30 条
 输入数据：
 【天气】
 - 北京：{beijing.get('weather', '未知')}，{beijing.get('temperature', '未知')}，{beijing.get('wind', '未知')}
