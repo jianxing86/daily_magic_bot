@@ -1,9 +1,10 @@
 """
 科学新闻获取模块
-支持多个新闻源：Nature, Science, ScienceDaily
+支持多个新闻源：Nature, ScienceDaily (via RSS)
 """
 import requests
 from bs4 import BeautifulSoup
+import feedparser
 import logging
 from typing import List, Dict
 from datetime import datetime, timedelta
@@ -27,12 +28,17 @@ class MultiSourceNewsFetcher:
             'Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1'
         }
-        self.sources = {
+        # Nature 使用网页抓取
+        self.nature_sources = {
             'nature_news': 'https://www.nature.com/latest-news',
             'nature_research': 'https://www.nature.com/nature/research-articles',
-            'sciencedaily': 'https://www.sciencedaily.com/',
-            'sciencedaily_top': 'https://www.sciencedaily.com/news/top/science/',
-            'sciencedaily_brain': 'https://www.sciencedaily.com/news/mind_brain/'
+        }
+        # ScienceDaily 使用 RSS
+        self.sciencedaily_rss = {
+            'sd_mind_brain': 'https://www.sciencedaily.com/rss/mind_brain.xml',
+            'sd_top_science': 'https://www.sciencedaily.com/rss/top/science.xml',
+            'sd_top_news': 'https://www.sciencedaily.com/rss/top.xml',
+            'sd_space_time': 'https://www.sciencedaily.com/rss/space_time.xml',
         }
     
     def fetch_all_news_titles(self) -> List[Dict]:
@@ -52,19 +58,26 @@ class MultiSourceNewsFetcher:
         # 2. Nature 研究文章
         all_news.extend(self._fetch_nature_research())
         
-        # 3. ScienceDaily 主页
-        all_news.extend(self._fetch_sciencedaily())
-        
-        # 4. ScienceDaily 科学板块
-        all_news.extend(self._fetch_sciencedaily_top())
-        
-        # 5. ScienceDaily 大脑认知
-        all_news.extend(self._fetch_sciencedaily_brain())
+        # 3-6. ScienceDaily RSS feeds
+        all_news.extend(self._fetch_sciencedaily_rss('sd_mind_brain', 'ScienceDaily Brain'))
+        all_news.extend(self._fetch_sciencedaily_rss('sd_top_science', 'ScienceDaily Top'))
+        all_news.extend(self._fetch_sciencedaily_rss('sd_top_news', 'ScienceDaily'))
+        all_news.extend(self._fetch_sciencedaily_rss('sd_space_time', 'ScienceDaily Space'))
         
         logger.info(f"总共获取 {len(all_news)} 条新闻标题")
         
+        # 去重（基于 URL）
+        seen_urls = set()
+        unique_news = []
+        for news in all_news:
+            if news['url'] not in seen_urls:
+                seen_urls.add(news['url'])
+                unique_news.append(news)
+        
+        logger.info(f"去重后: {len(unique_news)} 条")
+        
         # 过滤最近1-2天的新闻
-        recent_news = self._filter_recent_news(all_news, days=2)
+        recent_news = self._filter_recent_news(unique_news, days=2)
         logger.info(f"过滤后保留最近2天的新闻: {len(recent_news)} 条")
         
         return recent_news
@@ -73,7 +86,7 @@ class MultiSourceNewsFetcher:
         """获取 Nature 最新新闻"""
         try:
             logger.info("正在获取 Nature 最新新闻...")
-            response = requests.get(self.sources['nature_news'], headers=self.headers, timeout=15)
+            response = requests.get(self.nature_sources['nature_news'], headers=self.headers, timeout=15)
             soup = BeautifulSoup(response.text, 'html.parser')
             
             news_list = []
@@ -115,7 +128,7 @@ class MultiSourceNewsFetcher:
         """获取 Nature 研究文章"""
         try:
             logger.info("正在获取 Nature 研究文章...")
-            response = requests.get(self.sources['nature_research'], headers=self.headers, timeout=15)
+            response = requests.get(self.nature_sources['nature_research'], headers=self.headers, timeout=15)
             soup = BeautifulSoup(response.text, 'html.parser')
             
             news_list = []
@@ -148,150 +161,79 @@ class MultiSourceNewsFetcher:
             logger.error(f"获取 Nature 研究文章失败: {e}")
             return []
     
-    def _fetch_sciencedaily(self) -> List[Dict]:
-        """获取 ScienceDaily 主页新闻"""
+    def _fetch_sciencedaily_rss(self, feed_key: str, source_name: str) -> List[Dict]:
+        """
+        获取 ScienceDaily RSS 订阅
+        
+        Args:
+            feed_key: RSS feed 的 key (sd_mind_brain, sd_top_science, etc.)
+            source_name: 来源名称显示
+            
+        Returns:
+            新闻列表
+        """
         try:
-            logger.info("正在获取 ScienceDaily 主页...")
-            response = requests.get(self.sources['sciencedaily'], headers=self.headers, timeout=15)
-            soup = BeautifulSoup(response.text, 'html.parser')
+            rss_url = self.sciencedaily_rss.get(feed_key, '')
+            if not rss_url:
+                return []
+                
+            logger.info(f"正在获取 {source_name} RSS...")
+            feed = feedparser.parse(rss_url)
             
             news_list = []
-            links = soup.select('a[href*="/releases/"]')
-            
-            seen_urls = set()
-            for link in links:
-                url = link.get('href', '')
-                if not url or url in seen_urls:
-                    continue
-                    
-                if url.startswith('/'):
-                    url = 'https://www.sciencedaily.com' + url
-                    
-                title = link.get_text(strip=True)
-                if len(title) < 10:
+            for entry in feed.entries[:40]:  # 每个 feed 最多取 40 条
+                title = entry.get('title', '').strip()
+                url = entry.get('link', '')
+                
+                if not title or not url:
                     continue
                 
-                # 从 URL 中提取日期 (格式: /releases/YYYY/MM/YYMMDDHHMMSS.htm)
-                date_match = re.search(r'/releases/(\d{4})/(\d{2})/(\d{2})(\d{2})(\d{2})(\d{2})\.htm', url)
-                if date_match:
-                    year, month, day = date_match.group(1), date_match.group(2), date_match.group(3)
-                    date_str = f"{year}-{month}-{day}"
-                else:
-                    date_str = ''
+                # 解析发布日期
+                published = entry.get('published', '') or entry.get('updated', '')
+                date_str = self._parse_rss_date(published)
                 
-                seen_urls.add(url)
                 news_list.append({
                     'title': title,
                     'url': url,
-                    'source': 'ScienceDaily',
-                    'date': self._parse_date(date_str)
+                    'source': source_name,
+                    'date': date_str
                 })
-                
-                if len(news_list) >= 50:
-                    break
             
-            logger.info(f"  - ScienceDaily: {len(news_list)} 条")
+            logger.info(f"  - {source_name}: {len(news_list)} 条")
             return news_list
             
         except Exception as e:
-            logger.error(f"获取 ScienceDaily 失败: {e}")
+            logger.error(f"获取 {source_name} RSS 失败: {e}")
             return []
     
-    def _fetch_sciencedaily_top(self) -> List[Dict]:
-        """获取 ScienceDaily 科学板块"""
+    def _parse_rss_date(self, date_str: str) -> str:
+        """解析 RSS 日期格式为 YYYY-MM-DD"""
+        if not date_str:
+            return datetime.now().strftime('%Y-%m-%d')
+        
         try:
-            logger.info("正在获取 ScienceDaily 科学板块...")
-            response = requests.get(self.sources['sciencedaily_top'], headers=self.headers, timeout=15)
-            soup = BeautifulSoup(response.text, 'html.parser')
+            # RSS 常见日期格式: "Sun, 08 Dec 2025 05:00:00 GMT" 或 "2025-12-08T05:00:00Z"
+            from email.utils import parsedate_tz, mktime_tz
             
-            news_list = []
-            links = soup.select('a[href*="/releases/"]')
+            # 尝试 RFC 822 格式 (常见于 RSS)
+            parsed = parsedate_tz(date_str)
+            if parsed:
+                timestamp = mktime_tz(parsed)
+                return datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d')
             
-            seen_urls = set()
-            for link in links:
-                url = link.get('href', '')
-                if not url or url in seen_urls:
+            # 尝试 ISO 格式
+            for fmt in ['%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d']:
+                try:
+                    dt = datetime.strptime(date_str[:19], fmt)
+                    return dt.strftime('%Y-%m-%d')
+                except:
                     continue
-                    
-                if url.startswith('/'):
-                    url = 'https://www.sciencedaily.com' + url
-                    
-                title = link.get_text(strip=True)
-                if len(title) < 10:
-                    continue
-                
-                date_match = re.search(r'/releases/(\d{4})/(\d{2})/(\d{2})(\d{2})(\d{2})(\d{2})\.htm', url)
-                if date_match:
-                    year, month, day = date_match.group(1), date_match.group(2), date_match.group(3)
-                    date_str = f"{year}-{month}-{day}"
-                else:
-                    date_str = ''
-                
-                seen_urls.add(url)
-                news_list.append({
-                    'title': title,
-                    'url': url,
-                    'source': 'ScienceDaily Top',
-                    'date': self._parse_date(date_str)
-                })
-                
-                if len(news_list) >= 30:
-                    break
             
-            logger.info(f"  - ScienceDaily Top: {len(news_list)} 条")
-            return news_list
+            return datetime.now().strftime('%Y-%m-%d')
             
         except Exception as e:
-            logger.error(f"获取 ScienceDaily Top 失败: {e}")
-            return []
-    
-    def _fetch_sciencedaily_brain(self) -> List[Dict]:
-        """获取 ScienceDaily 大脑认知板块"""
-        try:
-            logger.info("正在获取 ScienceDaily 大脑认知板块...")
-            response = requests.get(self.sources['sciencedaily_brain'], headers=self.headers, timeout=15)
-            soup = BeautifulSoup(response.text, 'html.parser')
-            
-            news_list = []
-            links = soup.select('a[href*="/releases/"]')
-            
-            seen_urls = set()
-            for link in links:
-                url = link.get('href', '')
-                if not url or url in seen_urls:
-                    continue
-                    
-                if url.startswith('/'):
-                    url = 'https://www.sciencedaily.com' + url
-                    
-                title = link.get_text(strip=True)
-                if len(title) < 10:
-                    continue
-                
-                date_match = re.search(r'/releases/(\d{4})/(\d{2})/(\d{2})(\d{2})(\d{2})(\d{2})\.htm', url)
-                if date_match:
-                    year, month, day = date_match.group(1), date_match.group(2), date_match.group(3)
-                    date_str = f"{year}-{month}-{day}"
-                else:
-                    date_str = ''
-                
-                seen_urls.add(url)
-                news_list.append({
-                    'title': title,
-                    'url': url,
-                    'source': 'ScienceDaily Brain',
-                    'date': self._parse_date(date_str)
-                })
-                
-                if len(news_list) >= 30:
-                    break
-            
-            logger.info(f"  - ScienceDaily Brain: {len(news_list)} 条")
-            return news_list
-            
-        except Exception as e:
-            logger.error(f"获取 ScienceDaily Brain 失败: {e}")
-            return []
+            logger.warning(f"RSS日期解析失败 '{date_str}': {e}")
+            return datetime.now().strftime('%Y-%m-%d')
     
     def _parse_date(self, date_str: str) -> str:
         """解析并标准化日期格式为 YYYY-MM-DD"""
