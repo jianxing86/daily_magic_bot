@@ -28,17 +28,27 @@ class MultiSourceNewsFetcher:
             'Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1'
         }
-        # Nature 使用网页抓取
-        self.nature_sources = {
+        # Nature 网页抓取（仅 latest-news）
+        self.nature_web = {
             'nature_news': 'https://www.nature.com/latest-news',
-            'nature_research': 'https://www.nature.com/nature/research-articles',
         }
-        # ScienceDaily 使用 RSS
+        # Nature 系列 RSS
+        self.nature_rss = {
+            'nature': ('https://www.nature.com/nature.rss', 'Nature'),
+            'nature_astro': ('https://www.nature.com/natastron.rss', 'Nature Astronomy'),
+            'nature_psych': ('https://www.nature.com/nrpsychol.rss', 'Nature Reviews Psychology'),
+            'nature_comms': ('https://www.nature.com/ncomms.rss', 'Nature Communications'),
+        }
+        # Science 杂志 RSS
+        self.science_rss = {
+            'science_news': ('https://www.science.org/rss/news_current.xml', 'Science'),
+        }
+        # ScienceDaily RSS
         self.sciencedaily_rss = {
-            'sd_mind_brain': 'https://www.sciencedaily.com/rss/mind_brain.xml',
-            'sd_top_science': 'https://www.sciencedaily.com/rss/top/science.xml',
-            'sd_top_news': 'https://www.sciencedaily.com/rss/top.xml',
-            'sd_space_time': 'https://www.sciencedaily.com/rss/space_time.xml',
+            'sd_mind_brain': ('https://www.sciencedaily.com/rss/mind_brain.xml', 'ScienceDaily Brain'),
+            'sd_top_science': ('https://www.sciencedaily.com/rss/top/science.xml', 'ScienceDaily Top'),
+            'sd_top_news': ('https://www.sciencedaily.com/rss/top.xml', 'ScienceDaily'),
+            'sd_space_time': ('https://www.sciencedaily.com/rss/space_time.xml', 'ScienceDaily Space'),
         }
     
     def fetch_all_news_titles(self) -> List[Dict]:
@@ -52,17 +62,20 @@ class MultiSourceNewsFetcher:
         
         logger.info("开始从多个新闻源获取标题...")
         
-        # 1. Nature 最新新闻
+        # 1. Nature 最新新闻（网页抓取）
         all_news.extend(self._fetch_nature_news())
         
-        # 2. Nature 研究文章
-        all_news.extend(self._fetch_nature_research())
+        # 2-5. Nature 系列 RSS
+        for key, (url, source_name) in self.nature_rss.items():
+            all_news.extend(self._fetch_rss(url, source_name, max_items=60))
         
-        # 3-6. ScienceDaily RSS feeds
-        all_news.extend(self._fetch_sciencedaily_rss('sd_mind_brain', 'ScienceDaily Brain'))
-        all_news.extend(self._fetch_sciencedaily_rss('sd_top_science', 'ScienceDaily Top'))
-        all_news.extend(self._fetch_sciencedaily_rss('sd_top_news', 'ScienceDaily'))
-        all_news.extend(self._fetch_sciencedaily_rss('sd_space_time', 'ScienceDaily Space'))
+        # 6. Science 杂志 RSS
+        for key, (url, source_name) in self.science_rss.items():
+            all_news.extend(self._fetch_rss(url, source_name, max_items=60))
+        
+        # 7-10. ScienceDaily RSS
+        for key, (url, source_name) in self.sciencedaily_rss.items():
+            all_news.extend(self._fetch_rss(url, source_name, max_items=50))
         
         logger.info(f"总共获取 {len(all_news)} 条新闻标题")
         
@@ -83,17 +96,17 @@ class MultiSourceNewsFetcher:
         return recent_news
     
     def _fetch_nature_news(self) -> List[Dict]:
-        """获取 Nature 最新新闻"""
+        """获取 Nature 最新新闻（网页抓取）"""
         try:
             logger.info("正在获取 Nature 最新新闻...")
-            response = requests.get(self.nature_sources['nature_news'], headers=self.headers, timeout=15)
+            response = requests.get(self.nature_web['nature_news'], headers=self.headers, timeout=15)
             soup = BeautifulSoup(response.text, 'html.parser')
             
             news_list = []
             # Nature 使用 c-article-item 结构
             articles = soup.select('div.c-article-item__content')
             
-            for article in articles[:30]:  # 限制每个源的数量
+            for article in articles[:50]:  # 增加获取数量
                 title_elem = article.select_one('h3.c-article-item__title')
                 if not title_elem:
                     continue
@@ -124,64 +137,24 @@ class MultiSourceNewsFetcher:
             logger.error(f"获取 Nature 新闻失败: {e}")
             return []
     
-    def _fetch_nature_research(self) -> List[Dict]:
-        """获取 Nature 研究文章"""
-        try:
-            logger.info("正在获取 Nature 研究文章...")
-            response = requests.get(self.nature_sources['nature_research'], headers=self.headers, timeout=15)
-            soup = BeautifulSoup(response.text, 'html.parser')
-            
-            news_list = []
-            articles = soup.select('article')
-            
-            for article in articles[:30]:
-                title_elem = article.select_one('h3 a, h2 a')
-                if not title_elem:
-                    continue
-                    
-                title = title_elem.get_text(strip=True)
-                url = title_elem.get('href', '')
-                if url.startswith('/'):
-                    url = 'https://www.nature.com' + url
-                
-                date_elem = article.select_one('time')
-                date_str = date_elem.get('datetime', '') if date_elem else ''
-                
-                news_list.append({
-                    'title': title,
-                    'url': url,
-                    'source': 'Nature Research',
-                    'date': self._parse_date(date_str)
-                })
-            
-            logger.info(f"  - Nature Research: {len(news_list)} 条")
-            return news_list
-            
-        except Exception as e:
-            logger.error(f"获取 Nature 研究文章失败: {e}")
-            return []
-    
-    def _fetch_sciencedaily_rss(self, feed_key: str, source_name: str) -> List[Dict]:
+    def _fetch_rss(self, rss_url: str, source_name: str, max_items: int = 50) -> List[Dict]:
         """
-        获取 ScienceDaily RSS 订阅
+        通用 RSS 获取方法
         
         Args:
-            feed_key: RSS feed 的 key (sd_mind_brain, sd_top_science, etc.)
-            source_name: 来源名称显示
+            rss_url: RSS feed URL
+            source_name: 来源名称
+            max_items: 最大获取条数
             
         Returns:
             新闻列表
         """
         try:
-            rss_url = self.sciencedaily_rss.get(feed_key, '')
-            if not rss_url:
-                return []
-                
             logger.info(f"正在获取 {source_name} RSS...")
             feed = feedparser.parse(rss_url)
             
             news_list = []
-            for entry in feed.entries[:40]:  # 每个 feed 最多取 40 条
+            for entry in feed.entries[:max_items]:
                 title = entry.get('title', '').strip()
                 url = entry.get('link', '')
                 

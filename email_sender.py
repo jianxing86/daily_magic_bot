@@ -366,14 +366,22 @@ class EmailSender:
     def _simplify_source_name(self, source: str) -> str:
         """简化新闻来源名称"""
         source_map = {
+            # Nature 系列
             'Nature News': 'Nature',
-            'Nature Research': 'Nature',
+            'Nature': 'Nature',
+            'Nature Astronomy': 'Nat Astron',
+            'Nature Reviews Psychology': 'Nat Rev Psych',
+            'Nature Communications': 'Nat Commun',
+            # Science
+            'Science': 'Science',
+            # ScienceDaily
             'ScienceDaily': 'ScienceDaily',
             'ScienceDaily Top': 'ScienceDaily',
             'ScienceDaily Brain': 'ScienceDaily',
-            'Science': 'Science'
+            'ScienceDaily Space': 'ScienceDaily',
         }
         return source_map.get(source, source)
+
     
     def send_email(self, receiver_emails: List[str], subject: str, html_content: str, max_retries: int = 3) -> bool:
         """
