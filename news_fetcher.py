@@ -75,7 +75,7 @@ class MultiSourceNewsFetcher:
         
         # 7-10. ScienceDaily RSS
         for key, (url, source_name) in self.sciencedaily_rss.items():
-            all_news.extend(self._fetch_rss(url, source_name, max_items=50))
+            all_news.extend(self._fetch_rss(url, source_name, max_items=40))
         
         logger.info(f"总共获取 {len(all_news)} 条新闻标题")
         

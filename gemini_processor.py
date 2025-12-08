@@ -22,7 +22,7 @@ class GeminiProcessor:
             api_key: Gemini API密钥
         """
         self.client = genai.Client(api_key=api_key)
-        self.model_name = 'gemini-2.5-flash'
+        self.model_name = 'gemini-2.5-flash-lite'
         logger.info("Gemini处理器初始化成功")
     
     def generate_weather_content(self, character_name: str, weather_info: Dict) -> Dict[str, str]:
@@ -355,12 +355,7 @@ def process_daily_report(weather_data: Dict, news_list: List[Dict]) -> Dict:
                 try:
                     # 获取文章详情
                     article = fetcher.fetch_article_content(news['url'])
-                    content = article['full_text'] or article['abstract'] or ""
-                    
-                    # 只添加有内容的文章
-                    if len(content) < 50:
-                        logger.warning(f"文章内容过短或为空，跳过: {news['title'][:40]}...")
-                        continue
+                    content = article['full_text'] or article['abstract'] or "无内容"
                     
                     articles_to_process.append({
                         'title': news['title'],
@@ -375,7 +370,7 @@ def process_daily_report(weather_data: Dict, news_list: List[Dict]) -> Dict:
                     time.sleep(0.5)
                     
                 except Exception as e:
-                    logger.error(f"获取文章内容失败 {news['title'][:40]}: {e}")
+                    logger.error(f"获取文章内容失败 {news['title']}: {e}")
                     continue
         
         # 4. 批量处理新闻内容
