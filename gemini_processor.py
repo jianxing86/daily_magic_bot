@@ -243,7 +243,7 @@ class GeminiProcessor:
             articles_text = ""
             for i, art in enumerate(articles, 1):
                 # 限制每篇文章长度，避免token过多
-                content_preview = art['content'][:1500]
+                content_preview = art['content'][:5000]
                 articles_text += f"""
 文章 {i}:
 标题: {art['title']}

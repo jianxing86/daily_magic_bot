@@ -300,7 +300,7 @@ class MultiSourceNewsFetcher:
         return {
             'title': title,
             'abstract': abstract,
-            'full_text': full_text[:3000],  # 限制长度
+            'full_text': full_text[:5000],  # 限制长度
             'url': url
         }
     
@@ -323,7 +323,7 @@ class MultiSourceNewsFetcher:
         return {
             'title': title,
             'abstract': abstract,
-            'full_text': full_text[:3000],
+            'full_text': full_text[:5000],
             'url': url
         }
     
@@ -346,7 +346,7 @@ class MultiSourceNewsFetcher:
         return {
             'title': title,
             'abstract': abstract,
-            'full_text': full_text[:3000],
+            'full_text': full_text[:5000],
             'url': url
         }
 
