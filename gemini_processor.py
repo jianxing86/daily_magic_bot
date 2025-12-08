@@ -163,9 +163,9 @@ class GeminiProcessor:
             for i, news in enumerate(news_list, 1):
                 news_text += f"{i}. [{news.get('source', 'Unknown')}] {news['title']} ({news.get('date', '')})\n"
             
-            prompt = f"""你是哈利波特世界中的{character_name}。请完成以下任务：
+            prompt = f"""你是哈利波特世界中的{character_name}。请完成以下任务（**请全程使用中文回答**）：
 
-1. **角色问候**：以{character_name}的第一人称口吻写一段开场白（100-150字）。
+1. **角色问候**：以{character_name}的第一人称口吻用中文写一段开场白（100-150字）。
    - 总结今日天气（北京和济南）。
    - **简要提及今日科学界发生的有趣事情**（根据新闻列表）。
    - 语气符合角色性格，清新自然。
@@ -355,7 +355,12 @@ def process_daily_report(weather_data: Dict, news_list: List[Dict]) -> Dict:
                 try:
                     # 获取文章详情
                     article = fetcher.fetch_article_content(news['url'])
-                    content = article['full_text'] or article['abstract'] or "无内容"
+                    content = article['full_text'] or article['abstract'] or ""
+                    
+                    # 只添加有内容的文章
+                    if len(content) < 50:
+                        logger.warning(f"文章内容过短或为空，跳过: {news['title'][:40]}...")
+                        continue
                     
                     articles_to_process.append({
                         'title': news['title'],
@@ -370,7 +375,7 @@ def process_daily_report(weather_data: Dict, news_list: List[Dict]) -> Dict:
                     time.sleep(0.5)
                     
                 except Exception as e:
-                    logger.error(f"获取文章内容失败 {news['title']}: {e}")
+                    logger.error(f"获取文章内容失败 {news['title'][:40]}: {e}")
                     continue
         
         # 4. 批量处理新闻内容
