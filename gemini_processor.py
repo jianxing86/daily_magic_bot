@@ -353,21 +353,31 @@ def process_daily_report(weather_data: Dict, news_list: List[Dict]) -> Dict:
             if isinstance(idx, int) and 0 <= idx - 1 < len(news_list):
                 news = news_list[idx - 1]
                 try:
-                    # 获取文章详情
-                    article = fetcher.fetch_article_content(news['url'])
-                    content = article['full_text'] or article['abstract'] or "无内容"
+                    # 根据来源决定获取内容的方式
+                    # ScienceDaily 和 Science RSS 直接使用 RSS 中的摘要，避免抓取失败
+                    source = news.get('source', '')
+                    if source == 'Science' or source.startswith('ScienceDaily'):
+                        logger.info(f"使用RSS摘要作为内容: {news['title']}")
+                        content = news.get('description', '')
+                        if not content:
+                            content = news['title']  # 如果没有摘要，仅使用标题
+                    else:
+                        # 其他来源（如 Nature）尝试抓取全文
+                        article = fetcher.fetch_article_content(news['url'])
+                        content = article['full_text'] or article['abstract'] or "无内容"
                     
                     articles_to_process.append({
                         'title': news['title'],
                         'url': news['url'],
                         'content': content,
                         'date': news.get('date', ''),  # 保留日期
-                        'source': news.get('source', '')  # 保留来源
+                        'source': source  # 保留来源
                     })
                     
-                    # 避免爬虫请求过快
-                    import time
-                    time.sleep(0.5)
+                    # 仅在抓取网页时暂停，避免爬虫请求过快
+                    if not (source == 'Science' or source.startswith('ScienceDaily')):
+                        import time
+                        time.sleep(0.5)
                     
                 except Exception as e:
                     logger.error(f"获取文章内容失败 {news['title']}: {e}")

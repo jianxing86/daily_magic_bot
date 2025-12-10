@@ -123,11 +123,16 @@ class MultiSourceNewsFetcher:
                 date_elem = article.select_one('span.c-article-item__date')
                 date_str = date_elem.get_text(strip=True) if date_elem else ''
                 
+                # 提取摘要（如果有）
+                summary_elem = article.select_one('div.c-article-item__description, p')
+                summary = summary_elem.get_text(strip=True) if summary_elem else ''
+
                 news_list.append({
                     'title': title,
                     'url': url,
                     'source': 'Nature News',
-                    'date': self._parse_date(date_str)
+                    'date': self._parse_date(date_str),
+                    'description': summary
                 })
             
             logger.info(f"  - Nature News: {len(news_list)} 条")
@@ -165,11 +170,18 @@ class MultiSourceNewsFetcher:
                 published = entry.get('published', '') or entry.get('updated', '')
                 date_str = self._parse_rss_date(published)
                 
+                # 获取摘要/描述
+                summary = entry.get('summary', '') or entry.get('description', '')
+                # 清理HTML标签（简单清理）
+                if summary:
+                    summary = re.sub(r'<[^>]+>', '', summary).strip()
+                
                 news_list.append({
                     'title': title,
                     'url': url,
                     'source': source_name,
-                    'date': date_str
+                    'date': date_str,
+                    'description': summary
                 })
             
             logger.info(f"  - {source_name}: {len(news_list)} 条")
