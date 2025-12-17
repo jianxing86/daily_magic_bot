@@ -22,7 +22,7 @@ class GeminiProcessor:
             api_key: Gemini API密钥
         """
         self.client = genai.Client(api_key=api_key)
-        self.model_name = 'gemini-2.5-flash'
+        self.model_name = 'gemini-3-flash'
         logger.info("Gemini处理器初始化成功")
     
     def generate_weather_content(self, character_name: str, weather_info: Dict) -> Dict[str, str]:
