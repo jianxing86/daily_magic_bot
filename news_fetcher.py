@@ -89,9 +89,9 @@ class MultiSourceNewsFetcher:
         
         logger.info(f"去重后: {len(unique_news)} 条")
         
-        # 过滤最近1-2天的新闻
-        recent_news = self._filter_recent_news(unique_news, days=2)
-        logger.info(f"过滤后保留最近2天的新闻: {len(recent_news)} 条")
+        # 过滤最近1天的新闻
+        recent_news = self._filter_recent_news(unique_news, days=1)
+        logger.info(f"过滤后保留最近1天的新闻: {len(recent_news)} 条")
         
         return recent_news
     
