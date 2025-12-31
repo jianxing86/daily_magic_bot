@@ -172,25 +172,25 @@ class GeminiProcessor:
 
 2. **天气建议**：分别为北京和济南给出穿衣建议。
 
-3. **新闻筛选**：从列表中选出 10-25 条最重要的科学新闻。
-   **优先领域A - 天体物理学**（以下关键词平权）：
-   - 球状星团(globular cluster)、白矮星(white dwarf)、毫秒脉冲星(millisecond pulsar)
-   - 观测天体物理学(observational astrophysics)、恒星演化(stellar evolution)
-   - 望远镜(telescope)、星震学(asteroseismology)
-   - 中子星(neutron star)、X射线天文学(X-ray astronomy)、引力波(gravitational wave)
-   - 变星(variable star)、恒星物理(stellar physics)、脉冲星(pulsar)
+3. **新闻筛选与分类**：从列表中选出 15-30 条与以下领域**关键词高度相关**的科学新闻。
+
+   **领域A - 天体物理学**（关键词匹配优先）：
+   - 核心：球状星团(globular cluster)、白矮星(white dwarf)、毫秒脉冲星(millisecond pulsar)、脉冲星(pulsar)、中子星(neutron star)
+   - 恒星物理：恒星演化(stellar evolution)、星震学(asteroseismology)、变星(variable star)、双星(binary star)、恒星振荡(stellar oscillation)
+   - 观测：望远镜(telescope)、X射线天文学(X-ray astronomy)、引力波(gravitational wave)、光谱(spectroscopy)、GAIA、TESS、Kepler
    
-   **优先领域B - 心理学与神经科学**（以下关键词平权）：
-   - 元认知(metacognition)、fMRI、脑成像(brain imaging)
-   - 认知神经科学(cognitive neuroscience)、工作记忆(working memory)
-   - 注意力(attention)、决策(decision making)、意识(consciousness)
-   - 成瘾(addiction)、奖赏系统(reward system)、多巴胺(dopamine)
-   - 心理学(psychology)、神经科学(neuroscience)
+   **领域B - 元认知与心理学**（关键词匹配优先）：
+   - 核心：元认知(metacognition)、信心(confidence)、不确定性(uncertainty)、错误监控(error monitoring)、内省(introspection)
+   - 认知：知道感(feeling of knowing)、学习判断(judgment of learning)、自我意识(self-awareness)、工作记忆(working memory)、注意力(attention)、决策(decision making)
+   - 神经科学：fMRI、EEG、脑成像(brain imaging)、前额叶(prefrontal cortex)、认知神经科学(cognitive neuroscience)
    
-   **筛选原则**：
-   - 如果其他领域有重大科学发现，也应包含
-   - **日期优先**：同等重要性下，优先选择日期更近的新闻（今天 > 昨天）
-   - 数量建议 10-25 条，如果重要新闻较多可扩展到 30 条
+   **筛选原则**（按重要性排序）：
+   1. **关键词相关性最重要**：标题或摘要中直接包含上述关键词的新闻优先级最高
+   2. **领域专业源加权**：来自 Nature Astronomy、PsyPost、BPS Research Digest、PNAS Psychology 的相关新闻略微优先
+   3. **日期次要**：同等相关性下，优先选择日期更近的新闻
+   4. 如有其他领域的重大发现也可包含，但总量控制在 15-30 条
+   
+   **请为每条新闻标注所属领域**：A（天体物理）、B（元认知/心理学）、C（其他）
 输入数据：
 【天气】
 - 北京：{beijing.get('weather', '未知')}，{beijing.get('temperature', '未知')}，{beijing.get('wind', '未知')}
@@ -204,7 +204,11 @@ class GeminiProcessor:
     "greeting": "角色开场白内容...",
     "advice_beijing": "北京穿衣建议...",
     "advice_jinan": "济南穿衣建议...",
-    "selected_news_indices": [1, 3, 5, ...] // 选中的新闻编号列表（数字，10-25条）
+    "selected_news": [
+        {{"index": 1, "category": "A"}},
+        {{"index": 3, "category": "B"}},
+        ...
+    ]  // 选中的新闻，包含编号和领域分类（A/B/C），15-30条
 }}
 """
             
@@ -223,7 +227,7 @@ class GeminiProcessor:
                 "greeting": f"{character_name}祝您早安！今天的天气真不错！",
                 "advice_beijing": "请注意天气变化。",
                 "advice_jinan": "请注意天气变化。",
-                "selected_news_indices": list(range(1, min(16, len(news_list) + 1)))
+                "selected_news": [{"index": i, "category": "C"} for i in range(1, min(16, len(news_list) + 1))]
             }
 
 
@@ -345,11 +349,13 @@ def process_daily_report(weather_data: Dict, news_list: List[Dict]) -> Dict:
         }
         
         # 3. 处理选中的新闻
-        selected_indices = master_content.get('selected_news_indices', [])
-        logger.info(f"AI选中了 {len(selected_indices)} 条新闻")
+        selected_news = master_content.get('selected_news', [])
+        logger.info(f"AI选中了 {len(selected_news)} 条新闻")
         
         articles_to_process = []
-        for idx in selected_indices:
+        for item in selected_news:
+            idx = item.get('index') if isinstance(item, dict) else item
+            category = item.get('category', 'C') if isinstance(item, dict) else 'C'
             if isinstance(idx, int) and 0 <= idx - 1 < len(news_list):
                 news = news_list[idx - 1]
                 try:
@@ -371,7 +377,8 @@ def process_daily_report(weather_data: Dict, news_list: List[Dict]) -> Dict:
                         'url': news['url'],
                         'content': content,
                         'date': news.get('date', ''),  # 保留日期
-                        'source': source  # 保留来源
+                        'source': source,  # 保留来源
+                        'category': category  # 保留领域分类
                     })
                     
                     # 仅在抓取网页时暂停，避免爬虫请求过快
@@ -393,6 +400,7 @@ def process_daily_report(weather_data: Dict, news_list: List[Dict]) -> Dict:
                 if i < len(articles_to_process):
                     item['date'] = articles_to_process[i].get('date', '')
                     item['source'] = articles_to_process[i].get('source', '')
+                    item['category'] = articles_to_process[i].get('category', 'C')
             
             result['processed_news'] = processed
             

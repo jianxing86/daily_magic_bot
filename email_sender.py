@@ -54,38 +54,34 @@ class EmailSender:
         body {{
             font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
             line-height: 1.8;
-            color: #4a4a4a;
+            color: #333;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f9f9f9;
+            background-color: #fafafa;
         }}
         .container {{
             background-color: #ffffff;
             padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
         }}
         .greeting {{
-            font-size: 16px;
-            color: #555;
+            font-size: 15px;
+            color: #444;
             margin-bottom: 40px;
-            padding: 25px;
-            background-color: #f0f4f8;
-            border-left: 5px solid #aabec6;
-            border-radius: 4px;
-            font-style: italic;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-left: 3px solid #666;
         }}
         .section-title {{
-            font-size: 20px;
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
+            font-size: 18px;
+            color: #222;
+            margin-bottom: 25px;
             margin-top: 40px;
-            font-weight: 300;
-            letter-spacing: 2px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
         }}
         .weather-container {{
             display: flex;
@@ -94,29 +90,23 @@ class EmailSender:
         }}
         .weather-card {{
             flex: 1;
-            background-color: #ffffff;
-            padding: 25px;
-            border-radius: 8px;
-            border: 1px solid #e1e4e8;
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
             text-align: center;
-            transition: transform 0.2s;
-        }}
-        .weather-card:hover {{
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }}
         .weather-city {{
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
-            color: #34495e;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px dashed #eee;
+            color: #222;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
         }}
         .weather-main {{
-            font-size: 20px;
-            color: #2c3e50;
-            margin: 12px 0;
+            font-size: 18px;
+            color: #333;
+            margin: 10px 0;
             font-weight: bold;
             display: flex;
             justify-content: center;
@@ -124,92 +114,102 @@ class EmailSender:
             gap: 10px;
         }}
         .weather-condition {{
-            color: #2c3e50;
+            color: #222;
         }}
         .weather-divider {{
-            color: #bdc3c7;
+            color: #999;
             font-weight: normal;
-            font-size: 18px;
+            font-size: 16px;
         }}
         .weather-temp {{
-            color: #666;
+            color: #555;
             font-weight: normal;
-            font-size: 18px;
+            font-size: 16px;
         }}
         .weather-detail {{
-            font-size: 14px;
-            color: #7f8c8d;
-            margin: 5px 0;
-        }}
-        .weather-advice {{
-            margin-top: 15px;
             font-size: 13px;
             color: #666;
-            background-color: #fafafa;
+            margin: 4px 0;
+        }}
+        .weather-advice {{
+            margin-top: 12px;
+            font-size: 12px;
+            color: #555;
+            background-color: #f9f9f9;
             padding: 10px;
-            border-radius: 4px;
             text-align: left;
+            border: 1px solid #eee;
         }}
         .weather-alert {{
             margin-top: 10px;
             padding: 8px;
-            background-color: #fff3cd;
-            border-left: 3px solid #ff9800;
-            border-radius: 4px;
+            background-color: #fff8e1;
+            border-left: 3px solid #ffa000;
             text-align: left;
         }}
         .alert-item {{
             font-size: 12px;
-            color: #856404;
+            color: #6d4c00;
             margin: 3px 0;
         }}
-        .news-item {{
+        .category-section {{
+            margin-top: 30px;
             margin-bottom: 25px;
-            padding: 20px;
+        }}
+        .category-title {{
+            font-size: 15px;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding: 8px 12px;
+            background-color: #f0f0f0;
+            border-left: 3px solid #444;
+        }}
+        .news-item {{
+            margin-bottom: 20px;
+            padding: 15px;
             background-color: #fafafa;
-            border-radius: 6px;
-            border-left: 3px solid #5dade2;
+            border: 1px solid #e5e5e5;
         }}
         .news-title {{
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 10px;
+            color: #222;
+            margin-bottom: 8px;
         }}
         .news-link-btn {{
             display: inline-block;
-            margin-left: 8px;
-            padding: 2px 8px;
-            background-color: #e1f5fe;
-            color: #0288d1;
-            border-radius: 12px;
-            font-size: 12px;
+            margin-left: 6px;
+            padding: 1px 6px;
+            background-color: #f0f0f0;
+            color: #555;
+            border: 1px solid #ccc;
+            font-size: 11px;
             text-decoration: none;
             vertical-align: middle;
             font-weight: normal;
         }}
         .news-link-btn:hover {{
-            background-color: #b3e5fc;
+            background-color: #e0e0e0;
             text-decoration: none;
         }}
         .news-date {{
             margin-left: 5px;
             font-size: 11px;
-            color: #999;
+            color: #888;
             font-weight: normal;
             vertical-align: middle;
         }}
         .news-title-en {{
-            font-size: 13px;
-            color: #888;
-            font-style: italic;
-            margin-bottom: 10px;
+            font-size: 12px;
+            color: #777;
+            margin-bottom: 8px;
         }}
         .news-summary {{
-            font-size: 14px;
-            color: #555;
+            font-size: 13px;
+            color: #444;
             line-height: 1.6;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }}
         @media (max-width: 600px) {{
             body {{
@@ -218,7 +218,6 @@ class EmailSender:
             }}
             .container {{
                 padding: 15px;
-                border-radius: 8px;
             }}
             .greeting {{
                 font-size: 14px;
@@ -226,11 +225,10 @@ class EmailSender:
                 margin-bottom: 20px;
             }}
             .section-title {{
-                font-size: 18px;
+                font-size: 16px;
                 margin-bottom: 15px;
                 margin-top: 20px;
-                padding-bottom: 10px;
-                letter-spacing: 1px;
+                padding-bottom: 8px;
             }}
             .weather-container {{
                 flex-direction: column;
@@ -240,37 +238,41 @@ class EmailSender:
                 padding: 15px;
             }}
             .weather-city {{
-                font-size: 16px;
+                font-size: 15px;
                 margin-bottom: 10px;
             }}
             .weather-main {{
-                font-size: 20px;
+                font-size: 18px;
                 margin: 10px 0;
             }}
             .weather-detail {{
-                font-size: 13px;
+                font-size: 12px;
             }}
             .weather-advice {{
-                font-size: 12px;
+                font-size: 11px;
                 padding: 8px;
                 margin-top: 10px;
             }}
+            .category-title {{
+                font-size: 14px;
+                padding: 6px 10px;
+            }}
             .news-item {{
-                padding: 15px;
-                margin-bottom: 15px;
+                padding: 12px;
+                margin-bottom: 12px;
             }}
             .news-title {{
-                font-size: 15px;
-                margin-bottom: 8px;
+                font-size: 14px;
+                margin-bottom: 6px;
             }}
             .news-title-en {{
-                font-size: 12px;
-                margin-bottom: 8px;
+                font-size: 11px;
+                margin-bottom: 6px;
             }}
             .news-summary {{
-                font-size: 13px;
+                font-size: 12px;
                 line-height: 1.5;
-                margin-bottom: 8px;
+                margin-bottom: 6px;
             }}
         }}
     </style>
@@ -332,34 +334,57 @@ class EmailSender:
         return html
     
     def _generate_news_section(self, news_list: List[Dict]) -> str:
-        """生成新闻部分的HTML"""
+        """生成新闻部分的HTML（按领域分组）"""
         if not news_list:
             return ""
         
-        html = '<h2 class="section-title">科学新闻精选</h2>\n'
+        # 按领域分组
+        categories = {
+            'A': {'title': '🔭 天体物理', 'items': []},
+            'B': {'title': '🧠 元认知与心理学', 'items': []},
+            'C': {'title': '📰 其他科学发现', 'items': []}
+        }
         
         for news in news_list:
-            title_cn = news.get('title_cn', news.get('title', '未知标题'))
-            title_en = news.get('title_en', news.get('title', ''))
-            url = news.get('url', '#')
-            summary = news.get('summary', '')
-            date = news.get('date', '')  # 获取日期
-            source = news.get('source', '')  # 获取来源
+            category = news.get('category', 'C')
+            if category not in categories:
+                category = 'C'
+            categories[category]['items'].append(news)
+        
+        html = '<h2 class="section-title">科学新闻</h2>\n'
+        
+        # 按 A、B、C 顺序输出
+        for cat_key in ['A', 'B', 'C']:
+            cat_data = categories[cat_key]
+            if not cat_data['items']:
+                continue
             
-            # 简化来源名称
-            source_short = self._simplify_source_name(source)
+            html += f'<div class="category-section">\n'
+            html += f'<div class="category-title">{cat_data["title"]} ({len(cat_data["items"])})</div>\n'
             
-            html += f'''
+            for news in cat_data['items']:
+                title_cn = news.get('title_cn', news.get('title', '未知标题'))
+                title_en = news.get('title_en', news.get('title', ''))
+                url = news.get('url', '#')
+                summary = news.get('summary', '')
+                date = news.get('date', '')
+                source = news.get('source', '')
+                
+                source_short = self._simplify_source_name(source)
+                
+                html += f'''
             <div class="news-item">
                 <div class="news-title">
                     {title_cn}
-                    <a href="{url}" class="news-link-btn" target="_blank">🔗</a>
+                    <a href="{url}" class="news-link-btn" target="_blank">原文</a>
                     <span class="news-date">{date}</span>
                 </div>
                 <div class="news-title-en">{title_en}{', ' + source_short if source_short else ''}</div>
                 <div class="news-summary">{summary}</div>
             </div>
             '''
+            
+            html += '</div>\n'
         
         return html
     
@@ -379,6 +404,10 @@ class EmailSender:
             'ScienceDaily Top': 'ScienceDaily',
             'ScienceDaily Brain': 'ScienceDaily',
             'ScienceDaily Space': 'ScienceDaily',
+            # 心理学专门源
+            'PsyPost': 'PsyPost',
+            'BPS Research Digest': 'BPS',
+            'PNAS Psychology': 'PNAS',
         }
         return source_map.get(source, source)
 

@@ -50,6 +50,12 @@ class MultiSourceNewsFetcher:
             'sd_top_news': ('https://www.sciencedaily.com/rss/top.xml', 'ScienceDaily'),
             'sd_space_time': ('https://www.sciencedaily.com/rss/space_time.xml', 'ScienceDaily Space'),
         }
+        # 心理学专门源
+        self.psychology_rss = {
+            'psypost': ('https://www.psypost.org/feed/', 'PsyPost'),
+            'bps_digest': ('https://www.bps.org.uk/research-digest/feed', 'BPS Research Digest'),
+            'pnas_psych': ('https://www.pnas.org/action/showFeed?type=searchTopic&taxonomyCode=psych-soc', 'PNAS Psychology'),
+        }
     
     def fetch_all_news_titles(self) -> List[Dict]:
         """
@@ -75,6 +81,10 @@ class MultiSourceNewsFetcher:
         
         # 7-10. ScienceDaily RSS
         for key, (url, source_name) in self.sciencedaily_rss.items():
+            all_news.extend(self._fetch_rss(url, source_name, max_items=40))
+        
+        # 11-13. 心理学专门源
+        for key, (url, source_name) in self.psychology_rss.items():
             all_news.extend(self._fetch_rss(url, source_name, max_items=40))
         
         logger.info(f"总共获取 {len(all_news)} 条新闻标题")
