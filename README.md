@@ -54,7 +54,7 @@
 ### 1. 克隆或下载项目
 
 ```bash
-cd /Users/jianxing/Documents/Antigravity_Projects/1_DailyReportBot
+cd /Your/1_DailyReportBot
 ```
 
 ### 2. 创建Conda环境（推荐）
@@ -245,4 +245,4 @@ jobs:
 - 🔍 **能力增强**：
   - 新闻筛选结果：10-25 条精选新闻（可根据重要性动态调整）
   - 哈利波特问候语升级，能够感知并评论当天的科学大新闻
-- 🛠 **技术栈**：升级至 `gemini-2.5-flash` 模型，响应更快
+- 🛠 **技术栈**：升级至 `gemini-3-flash-preview` 模型，响应更快
