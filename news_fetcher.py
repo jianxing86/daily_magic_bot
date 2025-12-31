@@ -53,7 +53,7 @@ class MultiSourceNewsFetcher:
         # 心理学专门源
         self.psychology_rss = {
             'psypost': ('https://www.psypost.org/feed/', 'PsyPost'),
-            'bps_digest': ('https://www.bps.org.uk/research-digest/feed', 'BPS Research Digest'),
+            'neuroscience_news': ('https://neurosciencenews.com/feed/', 'Neuroscience News'),
             'pnas_psych': ('https://www.pnas.org/action/showFeed?type=searchTopic&taxonomyCode=psych-soc', 'PNAS Psychology'),
         }
     

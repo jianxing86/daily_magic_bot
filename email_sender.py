@@ -54,33 +54,33 @@ class EmailSender:
         body {{
             font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
             line-height: 1.8;
-            color: #333;
+            color: #444;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #fafafa;
+            background-color: #fcfcfc;
         }}
         .container {{
             background-color: #ffffff;
             padding: 40px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #eaeaea;
         }}
         .greeting {{
             font-size: 15px;
-            color: #444;
+            color: #555;
             margin-bottom: 40px;
             padding: 20px;
-            background-color: #f5f5f5;
-            border-left: 3px solid #666;
+            background-color: #f9f9f9;
+            border-left: 3px solid #999;
         }}
         .section-title {{
             font-size: 18px;
-            color: #222;
+            color: #444;
             margin-bottom: 25px;
             margin-top: 40px;
             font-weight: 500;
             letter-spacing: 1px;
-            border-bottom: 2px solid #333;
+            border-bottom: 1px solid #ccc;
             padding-bottom: 10px;
         }}
         .weather-container {{
@@ -92,37 +92,33 @@ class EmailSender:
             flex: 1;
             background-color: #fff;
             padding: 20px;
-            border: 1px solid #ddd;
+            border: 1px solid #e8e8e8;
             text-align: center;
         }}
         .weather-city {{
             font-size: 16px;
             font-weight: 600;
-            color: #222;
+            color: #444;
             margin-bottom: 12px;
             padding-bottom: 8px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #f0f0f0;
         }}
         .weather-main {{
             font-size: 18px;
-            color: #333;
+            color: #444;
             margin: 10px 0;
             font-weight: bold;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
         }}
         .weather-condition {{
-            color: #222;
+            color: #333;
         }}
         .weather-divider {{
-            color: #999;
+            color: #aaa;
             font-weight: normal;
             font-size: 16px;
         }}
         .weather-temp {{
-            color: #555;
+            color: #666;
             font-weight: normal;
             font-size: 16px;
         }}
@@ -158,39 +154,36 @@ class EmailSender:
         }}
         .category-title {{
             font-size: 15px;
-            color: #333;
+            color: #555;
             font-weight: 600;
             margin-bottom: 15px;
             padding: 8px 12px;
-            background-color: #f0f0f0;
-            border-left: 3px solid #444;
+            background-color: #f7f7f7;
+            border-left: 3px solid #aaa;
         }}
         .news-item {{
             margin-bottom: 20px;
             padding: 15px;
-            background-color: #fafafa;
-            border: 1px solid #e5e5e5;
+            background-color: #fcfcfc;
+            border: 1px solid #ececec;
         }}
         .news-title {{
             font-size: 15px;
             font-weight: 600;
-            color: #222;
+            color: #333;
             margin-bottom: 8px;
         }}
         .news-link-btn {{
             display: inline-block;
-            margin-left: 6px;
-            padding: 1px 6px;
-            background-color: #f0f0f0;
-            color: #555;
-            border: 1px solid #ccc;
-            font-size: 11px;
+            margin-left: 4px;
+            font-size: 10px;
             text-decoration: none;
             vertical-align: middle;
-            font-weight: normal;
+            color: #bbb;
+            opacity: 0.7;
         }}
         .news-link-btn:hover {{
-            background-color: #e0e0e0;
+            opacity: 1;
             text-decoration: none;
         }}
         .news-date {{
@@ -310,11 +303,15 @@ class EmailSender:
         html = f'''
         <div class="weather-card">
             <div class="weather-city">{city_name}</div>
-            <div class="weather-main">
-                <span class="weather-condition">{weather.get("weather", "未知")}</span>
-                <span class="weather-divider">|</span>
-                <span class="weather-temp">{weather.get("temperature", "未知")}</span>
-            </div>
+            <table style="width:100%; border-collapse:collapse;">
+                <tr>
+                    <td style="text-align:center; padding:8px 0;">
+                        <span class="weather-condition" style="font-size:18px; font-weight:bold; color:#333;">{weather.get("weather", "未知")}</span>
+                        <span class="weather-divider" style="color:#ccc; margin:0 8px;">|</span>
+                        <span class="weather-temp" style="font-size:16px; color:#666;">{weather.get("temperature", "未知")}</span>
+                    </td>
+                </tr>
+            </table>
             <div class="weather-detail">{weather.get("wind", "未知")}</div>
             <div class="weather-detail">🌅 {weather.get("sunrise", "未知")} | 🌇 {weather.get("sunset", "未知")}</div>
             '''
@@ -376,7 +373,7 @@ class EmailSender:
             <div class="news-item">
                 <div class="news-title">
                     {title_cn}
-                    <a href="{url}" class="news-link-btn" target="_blank">原文</a>
+                    <a href="{url}" class="news-link-btn" target="_blank">🔗</a>
                     <span class="news-date">{date}</span>
                 </div>
                 <div class="news-title-en">{title_en}{', ' + source_short if source_short else ''}</div>
@@ -406,7 +403,7 @@ class EmailSender:
             'ScienceDaily Space': 'ScienceDaily',
             # 心理学专门源
             'PsyPost': 'PsyPost',
-            'BPS Research Digest': 'BPS',
+            'Neuroscience News': 'Neuro News',
             'PNAS Psychology': 'PNAS',
         }
         return source_map.get(source, source)
